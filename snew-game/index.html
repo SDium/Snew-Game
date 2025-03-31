@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNEW</title>
+    <style>
+        :root {
+            --paddle-color: #f14552;
+            --ball-color: #0ce9f7;
+        }
+        
+        body {
+            background: #000;
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+        }
+        
+        canvas {
+            border: 2px solid white;
+            display: block;
+            margin: 0 auto;
+            background: #000;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 800px;
+            margin: 0 auto;
+        }
+        
+        #game-info {
+            text-align: center;
+            font-size: 20px;
+            margin-top: 10px;
+            color: white;
+        }
+        
+        #replay-button {
+            display: none;
+            position: absolute;
+            left: 50%;
+            top: 60%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            font-size: 20px;
+            background: white;
+            color: black;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        #replay-button:hover {
+            background: #ddd;
+        }
+        
+        #menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        #menu h1 {
+            color: white;
+            font-size: 48px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(241, 69, 82, 0.7);
+        }
+        
+        #start-button {
+            padding: 15px 30px;
+            font-size: 24px;
+            background: var(--paddle-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin-bottom: 30px;
+        }
+        
+        #start-button:hover {
+            background: #d13542;
+        }
+        
+        #controls-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        #controls-container h2 {
+            color: var(--ball-color);
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .key {
+            display: inline-block;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 4px;
+            margin: 0 5px;
+            font-weight: bold;
+        }
+        
+        #audio-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: white;
+            z-index: 5;
+        }
+        
+        #toggle-audio {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        #toggle-audio:hover {
+            transform: scale(1.1);
+        }
+        
+        #controls-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+            z-index: 5;
+        }
+        
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            user-select: none;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin: 0 10px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--paddle-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        #portal-button {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 16px;
+            font-size: 16px;
+            background: #1cb31c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 5;
+        }
+
+        #portal-button:hover {
+            background: #0a900a;
+            box-shadow: 0 0 10px rgba(28, 179, 28, 0.7);
+        }
+
+        .portal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: linear-gradient(to right, #0a900a, #1cb31c);
+            opacity: 0;
+            box-shadow: 0 0 30px #1cb31c;
+            z-index: 4;
+            transition: all 0.2s ease-out;
+        }
+
+        .portal.active {
+            width: 100px;
+            height: 100px;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 10px 5px rgba(28, 179, 28, 0.8);
+            }
+            50% {
+                box-shadow: 0 0 20px 10px rgba(28, 179, 28, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 10px 5px rgba(28, 179, 28, 0.8);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <div id="game-info"></div>
+        <button id="replay-button">Play Again</button>
+        
+        <div id="menu">
+            <h1>SNEW</h1>
+            <button id="start-button">Start Game</button>
+            
+            <div class="toggle-container">
+                <span>AI Enemies:</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="ai-enemies-toggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div id="controls-container">
+                <h2>Game Controls</h2>
+                <div class="control-group">
+                    <div>Select Paddle:</div>
+                    <div><span class="key">W</span> Top Paddle</div>
+                    <div><span class="key">A</span> Left Paddle</div>
+                    <div><span class="key">S</span> Bottom Paddle</div>
+                    <div><span class="key">D</span> Right Paddle</div>
+                </div>
+                <div class="control-group">
+                    <div>Move Selected Paddle:</div>
+                    <div><span class="key">←</span><span class="key">→</span> Horizontal Movement</div>
+                    <div><span class="key">↑</span><span class="key">↓</span> Vertical Movement</div>
+                </div>
+                <div class="control-group">
+                    <div>Other Controls:</div>
+                    <div><span class="key">M</span> Toggle Audio</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="audio-controls">
+            <button id="toggle-audio" aria-label="Toggle audio">🔊</button>
+        </div>
+        
+        <div class="portal" id="portal"></div>
+        <button id="portal-button">Activate Portal</button>
+    </div>
+    
+    <script>
+        // Game initialization and variables
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gameInfo = document.getElementById('game-info');
+        const replayButton = document.getElementById('replay-button');
+        const menu = document.getElementById('menu');
+        const startButton = document.getElementById('start-button');
+        const toggleAudioButton = document.getElementById('toggle-audio');
+
+        // Groq API related constants
+        const GROQ_API_KEY = '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';
+        const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+        let aiEnemiesEnabled = false;
+
+        // Portal related variables
+        let portalActive = false;
+        let portalSize = 0;
+        const MAX_PORTAL_SIZE = 150;
+        const PORTAL_GROWTH_RATE = 1;
+        const SUCTION_FORCE = 0.5;
+
+        // AI Enemy
+        let aiEnemy = null;
+        let aiEnemyEffect = null;
+
+        // Create audio context for Web Audio API
+        let audioContext;
+        let gameplayBuffer = null;
+        let victoryBuffer = null;
+        let gameplaySource = null;
+        let victorySource = null;
+        let audioPlaying = true;
+        
+        // Game constants
+        const PADDLE_WIDTH = 125;
+        const PADDLE_HEIGHT = 15;
+        const BALL_SIZE = 10;
+        const GNOME_SIZE = BALL_SIZE * 2;
+        const GNOME_IMAGE_SIZE = GNOME_SIZE * 8;
+        const INITIAL_BALL_SPEED = 1.5;
+        const PADDLE_SPEED = 14;
+        const GNOME_SPEED = 1;
+        const MAX_LEVEL = 5;
+        const INITIAL_HEARTS = 10;
+
+        // Colors
+        const PADDLE_COLOR = "#f14552";
+        const BALL_COLOR = "#0ce9f7";
+
+        // Load gnome image
+        const gnomeImage = new Image();
+        gnomeImage.src = "https://dl.dropboxusercontent.com/scl/fi/z9c83bdgiya3lv7ppjxgb/Gnome.png?rlkey=qzyw45wsrjb63f1tg2dpfxucl&st=7j1x91n8&raw=1";
+
+        // Load audio files
+        const loadAudio = async () => {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                const gameplayResponse = await fetch("https://dl.dropboxusercontent.com/scl/fi/v34mo7e0s726ld8vsd2es/SNEW_Battle.wav?rlkey=cns3v28ox417ijl6svwf54ff0&st=haqhz9ga&?raw=1");
+                const gameplayArrayBuffer = await gameplayResponse.arrayBuffer();
+                gameplayBuffer = await audioContext.decodeAudioData(gameplayArrayBuffer);
+                
+                const victoryResponse = await fetch("https://dl.dropboxusercontent.com/scl/fi/5prg2gxmiz1i7dvlz8qdd/SNEW_Victory.wav?rlkey=eat0zwm67qhn6m0rxk1oek3gf&st=afr1yabw&?raw=1");
+                const victoryArrayBuffer = await victoryResponse.arrayBuffer();
+                victoryBuffer = await audioContext.decodeAudioData(victoryArrayBuffer);
+                
+                console.log("Audio loaded successfully");
+            } catch (error) {
+                console.error("Error loading audio:", error);
+            }
+        };
+
+        // Game state
+        let gameState = {
+            hearts: INITIAL_HEARTS,
+            level: 1,
+            score: 0,
+            isGameOver: false,
+            isVictory: false,
+            ballSpeed: INITIAL_BALL_SPEED,
+            ballCanKill: false,
+            gameStarted: false
+        };
+
+        // Paddles
+        let paddles = {
+            left: { x: 0, y: canvas.height / 2 - PADDLE_WIDTH / 2, width: PADDLE_HEIGHT, height: PADDLE_WIDTH, active: false },
+            right: { x: canvas.width - PADDLE_HEIGHT, y: canvas.height / 2 - PADDLE_WIDTH / 2, width: PADDLE_HEIGHT, height: PADDLE_WIDTH, active: false },
+            top: { x: canvas.width / 2 - PADDLE_WIDTH / 2, y: 0, width: PADDLE_WIDTH, height: PADDLE_HEIGHT, active: false },
+            bottom: { x: canvas.width / 2 - PADDLE_WIDTH / 2, y: canvas.height - PADDLE_HEIGHT, width: PADDLE_WIDTH, height: PADDLE_HEIGHT, active: false }
+        };
+
+        // Ball and Gnomes initialization
+        let ball = resetBall();
+        let gnomes = [];
+        
+        // Event listeners
+        startButton.addEventListener('click', startGame);
+        replayButton.addEventListener('click', resetGame);
+        toggleAudioButton.addEventListener('click', toggleAudio);
+        document.getElementById('ai-enemies-toggle').addEventListener('change', function() {
+            aiEnemiesEnabled = this.checked;
+        });
+        document.getElementById('portal-button').addEventListener('click', activatePortal);
+
+        // Initialize audio 
+        loadAudio();
+        
+        // Add event listener for 'M' key to toggle audio
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyM') {
+                toggleAudio();
+            }
+        });
+
+        async function startGame() {
+            // Resume audio context if suspended (browser autoplay policy)
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            menu.style.display = 'none';
+            gameState.gameStarted = true;
+            
+            // Get the AI enemies toggle state
+            aiEnemiesEnabled = document.getElementById('ai-enemies-toggle').checked;
+            
+            // Instead of immediately calling resetGame, we'll wait for it to complete
+            await resetGame();
+            
+            // Start playing audio since default is unmuted
+            if (audioPlaying) {
+                playGameplayAudio();
+            }
+        }
+
+        function toggleAudio() {
+            audioPlaying = !audioPlaying;
+            
+            if (!audioPlaying) {
+                stopAllAudio();
+                toggleAudioButton.textContent = '🔇';
+            } else {
+                if (gameState.isVictory) {
+                    playVictoryAudio();
+                } else if (gameState.gameStarted && !gameState.isGameOver) {
+                    playGameplayAudio();
+                }
+                toggleAudioButton.textContent = '🔊';
+            }
+        }
+
+        function playGameplayAudio() {
+            if (!audioContext || !gameplayBuffer) return;
+            
+            stopAllAudio();
+            
+            gameplaySource = audioContext.createBufferSource();
+            gameplaySource.buffer = gameplayBuffer;
+            gameplaySource.loop = true;
+            gameplaySource.connect(audioContext.destination);
+            
+            try {
+                gameplaySource.start(0);
+            } catch (error) {
+                console.error("Error starting gameplay audio:", error);
+            }
+        }
+
+        function playVictoryAudio() {
+            if (!audioContext || !victoryBuffer) return;
+            
+            stopAllAudio();
+            
+            victorySource = audioContext.createBufferSource();
+            victorySource.buffer = victoryBuffer;
+            victorySource.connect(audioContext.destination);
+            
+            try {
+                victorySource.start(0);
+            } catch (error) {
+                console.error("Error starting victory audio:", error);
+            }
+        }
+
+        function stopAllAudio() {
+            if (gameplaySource) {
+                try {
+                    gameplaySource.stop();
+                } catch (e) {}
+                gameplaySource = null;
+            }
+            
+            if (victorySource) {
+                try {
+                    victorySource.stop();
+                } catch (e) {}
+                victorySource = null;
+            }
+        }
+
+        async function resetGame() {
+            gameState = {
+                hearts: INITIAL_HEARTS,
+                level: 1,
+                score: 0,
+                isGameOver: false,
+                isVictory: false,
+                ballSpeed: INITIAL_BALL_SPEED,
+                ballCanKill: false,
+                gameStarted: true
+            };
+            
+            ball = resetBall();
+            resetPaddlePositions();
+            gnomes = generateGnomes();
+            replayButton.style.display = 'none';
+            
+            // Reset portal
+            portalActive = false;
+            portalSize = 0;
+            document.getElementById('portal').classList.remove('active');
+            document.getElementById('portal-button').disabled = false;
+            document.getElementById('portal-button').style.opacity = 1;
+            
+            // Generate a new AI enemy if enabled
+            if (aiEnemiesEnabled) {
+                aiEnemy = await generateAIEnemy();
+                aiEnemyEffect = null;
+            } else {
+                aiEnemy = null;
+            }
+            
+            // Restart gameplay audio if it was previously playing
+            if (audioPlaying) {
+                playGameplayAudio();
+            }
+        }
+
+        function resetBall() {
+            return {
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                dx: Math.random() > 0.5 ? gameState.ballSpeed : -gameState.ballSpeed,
+                dy: Math.random() > 0.5 ? gameState.ballSpeed : -gameState.ballSpeed
+            };
+        }
+
+        function generateGnomes() {
+            const count = Math.min(32, Math.pow(2, gameState.level - 1));
+            const gnomes = [];
+            const safeZone = 150;
+            let maxAttempts = 100;
+
+            for (let i = 0; i < count; i++) {
+                let x, y;
+                let attempts = 0;
+                let validPosition = false;
+                
+                while (!validPosition && attempts < maxAttempts) {
+                    x = safeZone + Math.random() * (canvas.width - 2 * safeZone);
+                    y = safeZone + Math.random() * (canvas.height - 2 * safeZone);
+                    validPosition = !isPositionOccupied(x, y, gnomes);
+                    attempts++;
+                }
+                
+                if (!validPosition) {
+                    x = canvas.width / 2 + (Math.random() - 0.5) * 100;
+                    y = canvas.height / 2 + (Math.random() - 0.5) * 100;
+                }
+
+                gnomes.push({
+                    x: x,
+                    y: y,
+                    dx: (Math.random() - 0.5) * GNOME_SPEED * (1 + gameState.level * 0.1),
+                    dy: (Math.random() - 0.5) * GNOME_SPEED * (1 + gameState.level * 0.1)
+                });
+            }
+            
+            return gnomes;
+        }
+
+        function isPositionOccupied(x, y, gnomes) {
+            const minDistance = GNOME_IMAGE_SIZE;
+            
+            for (let gnome of gnomes) {
+                const distance = Math.sqrt(Math.pow(x - gnome.x, 2) + Math.pow(y - gnome.y, 2));
+                if (distance < minDistance) return true;
+            }
+            return false;
+        }
+
+        async function nextLevel() {
+            gameState.level++;
+            gameState.hearts = INITIAL_HEARTS;
+            gameState.ballSpeed = INITIAL_BALL_SPEED * (1 + (gameState.level - 1) * 0.05);
+            ball = resetBall();
+            resetPaddlePositions();
+            gnomes = generateGnomes();
+            gameState.ballCanKill = false;
+            
+            // Generate a new AI enemy if enabled
+            if (aiEnemiesEnabled) {
+                aiEnemy = await generateAIEnemy();
+                aiEnemyEffect = null;
+            } else {
+                aiEnemy = null;
+            }
+        }
+
+        function resetPaddlePositions() {
+            paddles.left.y = canvas.height / 2 - PADDLE_WIDTH / 2;
+            paddles.right.y = canvas.height / 2 - PADDLE_WIDTH / 2;
+            paddles.top.x = canvas.width / 2 - PADDLE_WIDTH / 2;
+            paddles.bottom.x = canvas.width / 2 - PADDLE_WIDTH / 2;
+            
+            // Reset active status
+            paddles.left.active = false;
+            paddles.right.active = false;
+            paddles.top.active = false;
+            paddles.bottom.active = false;
+        }
+
+        // Keyboard controls
+        let keys = {
+            ArrowLeft: false,
+            ArrowRight: false,
+            ArrowUp: false,
+            ArrowDown: false
+        };
+        
+        let activePaddle = null;
+
+        document.addEventListener('keydown', (e) => {
+            // WASD keys select the active paddle
+            if (e.code === 'KeyW') activePaddle = 'top';
+            else if (e.code === 'KeyA') activePaddle = 'left';
+            else if (e.code === 'KeyS') activePaddle = 'bottom';
+            else if (e.code === 'KeyD') activePaddle = 'right';
+            
+            // Set arrow key state
+            if (keys.hasOwnProperty(e.code)) {
+                keys[e.code] = true;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            // Update arrow key state
+            if (keys.hasOwnProperty(e.code)) {
+                keys[e.code] = false;
+            }
+        });
+
+        async function generateAIEnemy() {
+            if (!aiEnemiesEnabled) return null;
+            
+            try {
+                const prompt = `Generate a JSON object for a game enemy with these properties:
+                1. A random color (in hex format)
+                2. A special effect (one of: "speed_up", "slow_down", "enlarge_ball", "shrink_ball", "reverse_controls", "extra_life", "multi_ball")
+                3. A name for this enemy
+                4. A description of what it does
+                Format the response as a valid JSON object with keys: color, effect, name, description`;
+                
+                const response = await fetch(GROQ_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${GROQ_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: "llama3-70b-8192",
+                        messages: [
+                            {
+                                role: "user",
+                                content: prompt
+                            }
+                        ],
+                        temperature: 0.9,
+                        max_tokens: 500
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.text();
+                    console.error("API Error:", error);
+                    return generateFallbackEnemy();
+                }
+                
+                const data = await response.json();
+                const enemyData = JSON.parse(data.choices[0].message.content);
+                
+                console.log("AI Enemy Generated:", enemyData);
+                
+                // Generate the enemy with position similar to gnomes
+                const safeZone = 150;
+                const x = safeZone + Math.random() * (canvas.width - 2 * safeZone);
+                const y = safeZone + Math.random() * (canvas.height - 2 * safeZone);
+                
+                return {
+                    x: x,
+                    y: y,
+                    dx: (Math.random() - 0.5) * GNOME_SPEED * 1.5,
+                    dy: (Math.random() - 0.5) * GNOME_SPEED * 1.5,
+                    color: enemyData.color,
+                    effect: enemyData.effect,
+                    name: enemyData.name,
+                    description: enemyData.description,
+                    size: GNOME_SIZE * 1.5
+                };
+            } catch (error) {
+                console.error("Error generating AI enemy:", error);
+                return generateFallbackEnemy();
+            }
+        }
+
+        function generateFallbackEnemy() {
+            const effects = ["speed_up", "slow_down", "enlarge_ball", "shrink_ball", "reverse_controls", "extra_life", "multi_ball"];
+            const colors = ["#FF5733", "#33FF57", "#3357FF", "#F033FF", "#FF33F0", "#33FFF0", "#F0FF33"];
+            
+            const randomEffect = effects[Math.floor(Math.random() * effects.length)];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            const safeZone = 150;
+            const x = safeZone + Math.random() * (canvas.width - 2 * safeZone);
+            const y = safeZone + Math.random() * (canvas.height - 2 * safeZone);
+            
+            return {
+                x: x,
+                y: y,
+                dx: (Math.random() - 0.5) * GNOME_SPEED * 1.5,
+                dy: (Math.random() - 0.5) * GNOME_SPEED * 1.5,
+                color: randomColor,
+                effect: randomEffect,
+                name: "Fallback Enemy",
+                description: "A randomly generated enemy due to API limitation",
+                size: GNOME_SIZE * 1.5
+            };
+        }
+
+        function applyAIEnemyEffect() {
+            if (!aiEnemy || !aiEnemyEffect) return;
+            
+            const effect = aiEnemy.effect;
+            
+            // Apply the effect
+            switch(effect) {
+                case "speed_up":
+                    ball.dx *= 1.5;
+                    ball.dy *= 1.5;
+                    break;
+                case "slow_down":
+                    ball.dx *= 0.7;
+                    ball.dy *= 0.7;
+                    break;
+                case "enlarge_ball":
+                    // We'll handle this in the draw function
+                    break;
+                case "shrink_ball":
+                    // We'll handle this in the draw function
+                    break;
+                case "reverse_controls":
+                    // Reverse the arrow key states
+                    let temp = keys.ArrowLeft;
+                    keys.ArrowLeft = keys.ArrowRight;
+                    keys.ArrowRight = temp;
+                    
+                    temp = keys.ArrowUp;
+                    keys.ArrowUp = keys.ArrowDown;
+                    keys.ArrowDown = temp;
+                    break;
+                case "extra_life":
+                    gameState.hearts += 1;
+                    break;
+                case "multi_ball":
+                    // For simplicity, we'll just make the ball move faster in random directions
+                    ball.dx = (Math.random() > 0.5 ? 1 : -1) * gameState.ballSpeed * 2;
+                    ball.dy = (Math.random() > 0.5 ? 1 : -1) * gameState.ballSpeed * 2;
+                    break;
+            }
+            
+            // Set the effect duration with a timeout
+            setTimeout(() => {
+                aiEnemyEffect = null;
+            }, 5000);
+        }
+
+        function activatePortal() {
+            if (!portalActive && !gameState.isGameOver && !gameState.isVictory) {
+                portalActive = true;
+                document.getElementById('portal').classList.add('active');
+                document.getElementById('portal-button').disabled = true;
+                document.getElementById('portal-button').style.opacity = 0.5;
+            }
+        }
+
+        function updatePortal() {
+            if (!portalActive) return;
+            
+            const portal = document.getElementById('portal');
+            portalSize += PORTAL_GROWTH_RATE;
+            
+            if (portalSize > MAX_PORTAL_SIZE) {
+                portalSize = MAX_PORTAL_SIZE;
+            }
+            
+            portal.style.width = `${portalSize}px`;
+            portal.style.height = `${portalSize}px`;
+            
+            // Calculate distance from ball to portal center
+            const portalCenterX = canvas.width / 2;
+            const portalCenterY = canvas.height / 2;
+            const dx = portalCenterX - ball.x;
+            const dy = portalCenterY - ball.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Apply suction force if ball is close enough
+            if (distance < MAX_PORTAL_SIZE * 2) {
+                // Calculate suction magnitude (stronger when closer)
+                const suctionMagnitude = SUCTION_FORCE * (1 - Math.min(distance / (MAX_PORTAL_SIZE * 2), 1));
+                
+                // Apply suction force vector to ball velocity
+                ball.dx += (dx / distance) * suctionMagnitude;
+                ball.dy += (dy / distance) * suctionMagnitude;
+                
+                // If ball is sucked into the portal
+                if (distance < portalSize / 2) {
+                    window.location.href = "http://portal.pieter.com/";
+                }
+            }
+        }
+
+        function updatePaddles() {
+            // Reset all paddles to inactive
+            Object.keys(paddles).forEach(key => {
+                paddles[key].active = (key === activePaddle);
+            });
+            
+            // Handle paddle movement based on active paddle
+            if (activePaddle === 'top') {
+                if (keys.ArrowLeft) {
+                    paddles.top.x = Math.max(0, paddles.top.x - PADDLE_SPEED);
+                }
+                if (keys.ArrowRight) {
+                    paddles.top.x = Math.min(canvas.width - paddles.top.width, paddles.top.x + PADDLE_SPEED);
+                }
+            } else if (activePaddle === 'bottom') {
+                if (keys.ArrowLeft) {
+                    paddles.bottom.x = Math.max(0, paddles.bottom.x - PADDLE_SPEED);
+                }
+                if (keys.ArrowRight) {
+                    paddles.bottom.x = Math.min(canvas.width - paddles.bottom.width, paddles.bottom.x + PADDLE_SPEED);
+                }
+            } else if (activePaddle === 'left') {
+                if (keys.ArrowUp) {
+                    paddles.left.y = Math.max(0, paddles.left.y - PADDLE_SPEED);
+                }
+                if (keys.ArrowDown) {
+                    paddles.left.y = Math.min(canvas.height - paddles.left.height, paddles.left.y + PADDLE_SPEED);
+                }
+            } else if (activePaddle === 'right') {
+                if (keys.ArrowUp) {
+                    paddles.right.y = Math.max(0, paddles.right.y - PADDLE_SPEED);
+                }
+                if (keys.ArrowDown) {
+                    paddles.right.y = Math.min(canvas.height - paddles.right.height, paddles.right.y + PADDLE_SPEED);
+                }
+            }
+        }
+
+        function updateBall() {
+            // Update ball position
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            // Check for AI enemy collision
+            if (aiEnemy && gameState.ballCanKill) {
+                const dx = ball.x - aiEnemy.x;
+                const dy = ball.y - aiEnemy.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < aiEnemy.size + BALL_SIZE) {
+                    aiEnemyEffect = aiEnemy.effect;
+                    applyAIEnemyEffect();
+                    gameState.score += 50 * gameState.level;
+                    aiEnemy = null;
+                }
+            }
+
+            // Check for paddle collisions first
+            // Left paddle
+            if (ball.x <= paddles.left.x + paddles.left.width &&
+                ball.y >= paddles.left.y &&
+                ball.y <= paddles.left.y + paddles.left.height &&
+                ball.dx < 0) {
+                ball.dx = -ball.dx;
+                gameState.ballCanKill = true;
+            }
+            // Right paddle
+            else if (ball.x >= paddles.right.x - BALL_SIZE &&
+                ball.y >= paddles.right.y &&
+                ball.y <= paddles.right.y + paddles.right.height &&
+                ball.dx > 0) {
+                ball.dx = -ball.dx;
+                gameState.ballCanKill = true;
+            }
+            // Top paddle
+            else if (ball.y <= paddles.top.y + paddles.top.height &&
+                ball.x >= paddles.top.x &&
+                ball.x <= paddles.top.x + paddles.top.width &&
+                ball.dy < 0) {
+                ball.dy = -ball.dy;
+                gameState.ballCanKill = true;
+            }
+            // Bottom paddle
+            else if (ball.y >= paddles.bottom.y - BALL_SIZE &&
+                ball.x >= paddles.bottom.x &&
+                ball.x <= paddles.bottom.x + paddles.bottom.width &&
+                ball.dy > 0) {
+                ball.dy = -ball.dy;
+                gameState.ballCanKill = true;
+            }
+            // Check for wall collisions (out of bounds)
+            else if (ball.x < 0 || ball.x > canvas.width || ball.y < 0 || ball.y > canvas.height) {
+                gameState.hearts--;
+                gameState.ballCanKill = false;
+                
+                if (gameState.hearts <= 0) {
+                    gameState.isGameOver = true;
+                    replayButton.style.display = 'block';
+                    
+                    // Stop audio when game is over but keep audio toggle state
+                    if (audioPlaying) {
+                        stopAllAudio();
+                    }
+                } else {
+                    // Reset ball position when it goes out of bounds
+                    ball = resetBall();
+                }
+            }
+        }
+
+        function updateGnomes() {
+            // Update AI enemy if exists
+            if (aiEnemy) {
+                aiEnemy.x += aiEnemy.dx;
+                aiEnemy.y += aiEnemy.dy;
+                
+                const paddleMargin = 100;
+                if (aiEnemy.x < paddleMargin || aiEnemy.x > canvas.width - paddleMargin) {
+                    aiEnemy.dx = -aiEnemy.dx;
+                }
+                if (aiEnemy.y < paddleMargin || aiEnemy.y > canvas.height - paddleMargin) {
+                    aiEnemy.dy = -aiEnemy.dy;
+                }
+            }
+
+            // The rest of the original updateGnomes function...
+            for (let i = gnomes.length - 1; i >= 0; i--) {
+                const gnome = gnomes[i];
+
+                gnome.x += gnome.dx;
+                gnome.y += gnome.dy;
+
+                const paddleMargin = 100;
+                if (gnome.x < paddleMargin || gnome.x > canvas.width - paddleMargin) {
+                    gnome.dx = -gnome.dx;
+                }
+                if (gnome.y < paddleMargin || gnome.y > canvas.height - paddleMargin) {
+                    gnome.dy = -gnome.dy;
+                }
+
+                if (gameState.ballCanKill) {
+                    const dx = ball.x - gnome.x;
+                    const dy = ball.y - gnome.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < GNOME_SIZE + BALL_SIZE) {
+                        gnomes.splice(i, 1);
+                        gameState.score += 10 * gameState.level;
+                    }
+                }
+            }
+
+            if (gnomes.length === 0) {
+                if (gameState.level >= MAX_LEVEL) {
+                    gameState.isVictory = true;
+                    replayButton.style.display = 'block';
+                    
+                    // Stop gameplay audio and play victory audio
+                    if (audioPlaying) {
+                        playVictoryAudio();
+                    }
+                } else {
+                    nextLevel();
+                }
+            }
+        }
+
+        function draw() {
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw background grid (new feature)
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            
+            // Draw vertical grid lines
+            for (let x = 0; x <= canvas.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            // Draw horizontal grid lines
+            for (let y = 0; y <= canvas.height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Draw paddles
+            ctx.fillStyle = PADDLE_COLOR;
+            Object.values(paddles).forEach(paddle => {
+                ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+                
+                // Highlight active paddle with a glow effect
+                if (paddle.active) {
+                    ctx.strokeStyle = '#FFF';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(paddle.x - 2, paddle.y - 2, paddle.width + 4, paddle.height + 4);
+                    
+                    // Add glow effect
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = "#FFF";
+                    ctx.strokeRect(paddle.x - 2, paddle.y - 2, paddle.width + 4, paddle.height + 4);
+                    ctx.shadowBlur = 0;
+                }
+            });
+
+            // Draw ball with glow effect (adjust size if enemy effect is active)
+            let ballSize = BALL_SIZE;
+            if (aiEnemyEffect) {
+                if (aiEnemyEffect === "enlarge_ball") {
+                    ballSize = BALL_SIZE * 2;
+                } else if (aiEnemyEffect === "shrink_ball") {
+                    ballSize = BALL_SIZE * 0.5;
+                }
+            }
+            
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ballSize, 0, Math.PI * 2);
+            ctx.fillStyle = BALL_COLOR;
+            
+            // Add glow effect if ball can kill
+            if (gameState.ballCanKill) {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = BALL_COLOR;
+            }
+            
+            ctx.fill();
+            ctx.closePath();
+            ctx.shadowBlur = 0;
+
+            // Draw AI enemy if exists
+            if (aiEnemy) {
+                ctx.beginPath();
+                ctx.arc(aiEnemy.x, aiEnemy.y, aiEnemy.size, 0, Math.PI * 2);
+                ctx.fillStyle = aiEnemy.color;
+                
+                // Add glow effect
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = aiEnemy.color;
+                
+                ctx.fill();
+                ctx.closePath();
+                ctx.shadowBlur = 0;
+                
+                // Draw enemy name above it
+                ctx.font = '14px Arial';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText(aiEnemy.name, aiEnemy.x, aiEnemy.y - aiEnemy.size - 10);
+            }
+
+            // Draw gnomes using the image
+            gnomes.forEach(gnome => {
+                try {
+                    const halfSize = GNOME_IMAGE_SIZE / 2;
+                    ctx.drawImage(
+                        gnomeImage, 
+                        gnome.x - halfSize, 
+                        gnome.y - halfSize, 
+                        GNOME_IMAGE_SIZE, 
+                        GNOME_IMAGE_SIZE
+                    );
+                } catch (err) {
+                    // Fallback to a simple circle if image fails
+                    ctx.beginPath();
+                    ctx.arc(gnome.x, gnome.y, GNOME_SIZE, 0, Math.PI * 2);
+                    ctx.fillStyle = "red";
+                    ctx.fill();
+                    ctx.closePath();
+                }
+            });
+
+            // Show active effect if any
+            if (aiEnemyEffect) {
+                ctx.font = '18px Arial';
+                ctx.fillStyle = 'yellow';
+                ctx.textAlign = 'left';
+                ctx.fillText(`Active Effect: ${aiEnemyEffect.replace(/_/g, ' ')}`, 10, 30);
+            }
+
+            // Update game info
+            let enemyInfo = aiEnemy ? ` | AI Enemy: ${aiEnemy.name}` : '';
+            gameInfo.textContent = `Hearts: ${gameState.hearts} | Level: ${gameState.level}/${MAX_LEVEL} | Score: ${gameState.score} | Gnomes: ${gnomes.length}${enemyInfo}`;
+
+            // Draw game over / victory overlay
+            if (gameState.isGameOver || gameState.isVictory) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Set text style with shadow for better visibility
+                ctx.fillStyle = gameState.isVictory ? '#4CFF00' : '#FF0000';
+                ctx.font = 'bold 48px Arial';
+                ctx.textAlign = 'center';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = gameState.isVictory ? '#4CFF00' : '#FF0000';
+                
+                ctx.fillText(
+                    gameState.isVictory ? 'Victory!' : 'Game Over!',
+                    canvas.width / 2,
+                    canvas.height / 2
+                );
+                
+                // Add final score
+                ctx.font = '24px Arial';
+                ctx.fillText(
+                    `Final Score: ${gameState.score}`,
+                    canvas.width / 2,
+                    canvas.height / 2 + 50
+                );
+                
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function gameLoop() {
+            if (gameState.gameStarted && !gameState.isGameOver && !gameState.isVictory) {
+                updatePaddles();
+                updateBall();
+                updateGnomes();
+                
+                // Update portal if active
+                if (portalActive) {
+                    updatePortal();
+                }
+            }
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initial draw of the screen
+        draw();
+        gameLoop();
+    </script>
+</body>
+</html>
