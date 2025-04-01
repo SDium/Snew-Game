@@ -98,13 +98,13 @@
             width: 0;
             height: 0;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(0,255,255,0.3) 0%, rgba(0,0,255,0.1) 70%, transparent 100%);
+            background: radial-gradient(circle, rgba(0,255,0,0.5) 0%, rgba(10,144,10,0.3) 70%, transparent 100%);
             transition: width 0.1s, height 0.1s;
             pointer-events: none;
         }
         
         #portal.active {
-            box-shadow: 0 0 20px #0ff;
+            box-shadow: 0 0 20px #0f0;
         }
         
         #portal-button {
@@ -716,7 +716,20 @@
                 
                 // If ball is sucked into the portal
                 if (distance < portalSize / 2) {
-                    window.location.href = "http://portal.pieter.com/";
+                    // Stop the game loop and audio before redirecting
+                    gameState.isGameOver = true;
+                    if (audioPlaying) {
+                        stopAllAudio();
+                    }
+                    
+                    // Add a visual effect before redirecting
+                    portal.style.boxShadow = '0 0 50px #0f0';
+                    portal.style.opacity = '1';
+                    
+                    // Redirect after a short delay for visual effect
+                    setTimeout(() => {
+                        window.location.href = "http://portal.pieter.com/";
+                    }, 500);
                 }
             }
         }
