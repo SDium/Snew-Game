@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNEW</title>
+    <style>
+        /* ... [Previous CSS remains the same] ... */
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <div id="game-info"></div>
+        <button id="replay-button" style="display: none;">Play Again</button>
+        <div id="menu">
+            <h1>SNEW</h1>
+            <button id="start-button">Start Game</button>
+            <div id="controls-container">
+                <h2>Controls</h2>
+                <div class="control-group">
+                    <span>Move Left: <span class="key">←</span></span>
+                    <span>Move Right: <span class="key">→</span></span>
+                </div>
+            </div>
+        </div>
+        <div id="audio-controls">
+            <button id="toggle-audio">🔊</button>
+        </div>
+        <div id="controls-info">
+            <div class="toggle-container">
+                <span>AI Mode:</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="ai-toggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get API key from environment variable
+        const API_KEY = import.meta.env.VITE_API_KEY || '';
+        
+        // Rest of your game code remains the same, but now uses API_KEY when needed
+        
+        // Example of using the API key in a function:
+        async function makeAPICall() {
+            try {
+                const response = await fetch('YOUR_API_ENDPOINT', {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`
+                    }
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('API call failed:', error);
+                return null;
+            }
+        }
+
+        // [Rest of your game code goes here]
+    </script>
+</body>
+</html>
