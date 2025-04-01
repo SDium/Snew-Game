@@ -49,172 +49,64 @@
             top: 60%;
             transform: translateX(-50%);
             padding: 10px 20px;
-            font-size: 20px;
-            background: white;
-            color: black;
+            font-size: 18px;
+            background: #f14552;
+            color: white;
             border: none;
-            cursor: pointer;
             border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        
-        #replay-button:hover {
-            background: #ddd;
+            cursor: pointer;
         }
         
         #menu {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid var(--paddle-color);
         }
         
         #menu h1 {
-            color: white;
-            font-size: 48px;
-            margin-bottom: 30px;
-            text-shadow: 0 0 10px rgba(241, 69, 82, 0.7);
+            color: var(--paddle-color);
+            margin-bottom: 20px;
         }
         
-        #start-button {
-            padding: 15px 30px;
-            font-size: 24px;
+        #menu button {
             background: var(--paddle-color);
             color: white;
             border: none;
-            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
             border-radius: 5px;
-            transition: background-color 0.3s;
-            margin-bottom: 30px;
-        }
-        
-        #start-button:hover {
-            background: #d13542;
-        }
-        
-        #controls-container {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            max-width: 400px;
-            text-align: center;
-        }
-        
-        #controls-container h2 {
-            color: var(--ball-color);
-            font-size: 24px;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        
-        .control-group {
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .key {
-            display: inline-block;
-            padding: 5px 10px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 4px;
-            margin: 0 5px;
-            font-weight: bold;
-        }
-        
-        #audio-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: white;
-            z-index: 5;
-        }
-        
-        #toggle-audio {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
             cursor: pointer;
-            transition: transform 0.3s;
+            transition: background-color 0.3s;
         }
         
-        #toggle-audio:hover {
-            transform: scale(1.1);
+        #menu button:hover {
+            background: var(--ball-color);
         }
         
-        #controls-info {
+        #portal {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            color: rgba(255,255,255,0.7);
-            font-size: 14px;
-            z-index: 5;
-        }
-        
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            margin: 15px 0;
-            user-select: none;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-            margin: 0 10px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 0;
             height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
             border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,255,255,0.3) 0%, rgba(0,0,255,0.1) 70%, transparent 100%);
+            transition: width 0.1s, height 0.1s;
+            pointer-events: none;
         }
-
-        input:checked + .toggle-slider {
-            background-color: var(--paddle-color);
+        
+        #portal.active {
+            box-shadow: 0 0 20px #0ff;
         }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
-
+        
         #portal-button {
             position: absolute;
             left: 50%;
@@ -229,7 +121,7 @@
             transition: all 0.3s;
             z-index: 5;
         }
-
+        
         #portal-button:hover {
             background: #0a900a;
             box-shadow: 0 0 10px rgba(28, 179, 28, 0.7);
@@ -274,54 +166,53 @@
     <div id="game-container">
         <canvas id="gameCanvas" width="800" height="500"></canvas>
         <div id="game-info"></div>
-        <button id="replay-button" style="display: none;">Play Again</button>
+        <button id="replay-button">Play Again</button>
+        <button id="portal-button">Open Portal</button>
+        <button id="toggle-audio">🔊</button>
+        
         <div id="menu">
             <h1>SNEW</h1>
             <button id="start-button">Start Game</button>
-            
-            <div class="toggle-container">
-                <span>AI Enemies:</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="ai-enemies-toggle">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            
             <div id="controls-container">
-                <h2>Game Controls</h2>
+                <h2>Controls</h2>
                 <div class="control-group">
-                    <div>Select Paddle:</div>
-                    <div><span class="key">W</span> Top Paddle</div>
-                    <div><span class="key">A</span> Left Paddle</div>
-                    <div><span class="key">S</span> Bottom Paddle</div>
-                    <div><span class="key">D</span> Right Paddle</div>
+                    <p>Select Paddle: <span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span></p>
+                    <p>Move Paddle: <span class="key">↑</span> <span class="key">↓</span> <span class="key">←</span> <span class="key">→</span></p>
+                    <p>Toggle Audio: <span class="key">M</span></p>
                 </div>
                 <div class="control-group">
-                    <div>Move Selected Paddle:</div>
-                    <div><span class="key">←</span><span class="key">→</span> Horizontal Movement</div>
-                    <div><span class="key">↑</span><span class="key">↓</span> Vertical Movement</div>
-                </div>
-                <div class="control-group">
-                    <div>Other Controls:</div>
-                    <div><span class="key">M</span> Toggle Audio</div>
+                    <p>AI Enemies:</p>
+                    <label class="switch">
+                        <input type="checkbox" id="ai-enemies-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
                 </div>
             </div>
         </div>
         
-        <div id="audio-controls">
-            <button id="toggle-audio" aria-label="Toggle audio">🔊</button>
-        </div>
-        
-        <div class="portal" id="portal"></div>
-        <button id="portal-button">Activate VibePortal</button>
+        <div id="portal"></div>
     </div>
 
-    <script>
+    <script type="module">
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const API_KEY = typeof import.meta !== 'undefined' ? 
-            import.meta.env.VITE_API_KEY : 
-            window.ENV.VITE_API_KEY || '';
+        const menu = document.getElementById('menu');
+        const gameInfo = document.getElementById('game-info');
+        const startButton = document.getElementById('start-button');
+        const replayButton = document.getElementById('replay-button');
+        const toggleAudioButton = document.getElementById('toggle-audio');
+        let API_KEY = ''; // For security, add your API key through environment variables when deploying
+        
+        // Safely check for environment variables
+        try {
+            if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_KEY) {
+                API_KEY = import.meta.env.VITE_API_KEY;
+            } else if (window.ENV && window.ENV.VITE_API_KEY) {
+                API_KEY = window.ENV.VITE_API_KEY;
+            }
+        } catch (e) {
+            console.log('Environment variables not available, using default API key');
+        }
         
         // Game constants
         const PADDLE_WIDTH = 125;
@@ -361,25 +252,6 @@
         const gnomeImage = new Image();
         gnomeImage.src = "https://dl.dropboxusercontent.com/scl/fi/z9c83bdgiya3lv7ppjxgb/Gnome.png?rlkey=qzyw45wsrjb63f1tg2dpfxucl&st=7j1x91n8&raw=1";
 
-        // Load audio files
-        const loadAudio = async () => {
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                
-                const gameplayResponse = await fetch("https://dl.dropboxusercontent.com/scl/fi/v34mo7e0s726ld8vsd2es/SNEW_Battle.wav?rlkey=cns3v28ox417ijl6svwf54ff0&st=haqhz9ga&?raw=1");
-                const gameplayArrayBuffer = await gameplayResponse.arrayBuffer();
-                gameplayBuffer = await audioContext.decodeAudioData(gameplayArrayBuffer);
-                
-                const victoryResponse = await fetch("https://dl.dropboxusercontent.com/scl/fi/5prg2gxmiz1i7dvlz8qdd/SNEW_Victory.wav?rlkey=eat0zwm67qhn6m0rxk1oek3gf&st=afr1yabw&?raw=1");
-                const victoryArrayBuffer = await victoryResponse.arrayBuffer();
-                victoryBuffer = await audioContext.decodeAudioData(victoryArrayBuffer);
-                
-                console.log("Audio loaded successfully");
-            } catch (error) {
-                console.error("Error loading audio:", error);
-            }
-        };
-
         // Game state
         let gameState = {
             hearts: INITIAL_HEARTS,
@@ -391,6 +263,9 @@
             ballCanKill: false,
             gameStarted: false
         };
+
+        // Track if game loop has started
+        let gameLoopStarted = false;
 
         // Paddles
         let paddles = {
@@ -404,10 +279,7 @@
         let ball = resetBall();
         let gnomes = [];
 
-        const startButton = document.getElementById('start-button');
-        const replayButton = document.getElementById('replay-button');
-        const toggleAudioButton = document.getElementById('toggle-audio');
-
+        // Event listeners
         startButton.addEventListener('click', startGame);
         replayButton.addEventListener('click', resetGame);
         toggleAudioButton.addEventListener('click', toggleAudio);
@@ -429,21 +301,27 @@
         async function startGame() {
             // Resume audio context if suspended (browser autoplay policy)
             if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume();
+                await audioContext.resume();
             }
             
-            document.getElementById('menu').style.display = 'none';
+            menu.style.display = 'none';
             gameState.gameStarted = true;
             
             // Get the AI enemies toggle state
             aiEnemiesEnabled = document.getElementById('ai-enemies-toggle').checked;
             
-            // Instead of immediately calling resetGame, we'll wait for it to complete
+            // Reset game state and initialize game elements
             await resetGame();
             
             // Start playing audio since default is unmuted
             if (audioPlaying) {
                 playGameplayAudio();
+            }
+            
+            // Ensure game loop is running
+            if (!gameLoopStarted) {
+                gameLoopStarted = true;
+                requestAnimationFrame(gameLoop);
             }
         }
 
@@ -675,19 +553,22 @@
                 4. A description of what it does
                 Format the response as a valid JSON object with keys: color, effect, name, description`;
                 
-                const response = await fetch('YOUR_API_ENDPOINT', {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${API_KEY}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
+                        model: "llama3-70b-8192",
                         messages: [
                             {
                                 role: "user",
                                 content: prompt
                             }
-                        ]
+                        ],
+                        temperature: 0.9,
+                        max_tokens: 500
                     })
                 });
                 
@@ -1173,9 +1054,41 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Initial draw of the screen
-        draw();
-        gameLoop();
+        async function loadAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                const gameplayResponse = await fetch("https://dl.dropboxusercontent.com/scl/fi/v34mo7e0s726ld8vsd2es/SNEW_Battle.wav?rlkey=cns3v28ox417ijl6svwf54ff0&st=haqhz9ga&raw=1");
+                const gameplayArrayBuffer = await gameplayResponse.arrayBuffer();
+                gameplayBuffer = await audioContext.decodeAudioData(gameplayArrayBuffer);
+                
+                const victoryResponse = await fetch("https://dl.dropboxusercontent.com/scl/fi/5prg2gxmiz1i7dvlz8qdd/SNEW_Victory.wav?rlkey=eat0zwm67qhn6m0rxk1oek3gf&st=afr1yabw&raw=1");
+                const victoryArrayBuffer = await victoryResponse.arrayBuffer();
+                victoryBuffer = await audioContext.decodeAudioData(victoryArrayBuffer);
+                
+                console.log("Audio loaded successfully");
+            } catch (error) {
+                console.error("Error loading audio:", error);
+            }
+        }
+
+        // Initialize game
+        function init() {
+            // Hide replay button initially
+            replayButton.style.display = 'none';
+            
+            // Initialize game info
+            gameInfo.textContent = `Hearts: ${gameState.hearts} | Level: ${gameState.level}/${MAX_LEVEL} | Score: ${gameState.score} | Gnomes: 0`;
+            
+            // Load audio
+            loadAudio();
+            
+            // Draw initial screen but don't start game loop until user clicks Start
+            draw();
+        }
+
+        // Initial setup
+        init();
     </script>
 </body>
 </html>
